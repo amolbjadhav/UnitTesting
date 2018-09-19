@@ -1,0 +1,78 @@
+#########################################################################
+# Copyright 2017-2018 VMware Inc.
+# This file is part of VNF-ONboarding
+# All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# For those usages not covered by the Apache License, Version 2.0 please
+# contact:  osslegalrouting@vmware.com
+
+###########################################################################
+
+heat_template_version: 2016-10-14
+resources: 
+    vdu_1:
+       type: OS::Nova::Server
+       properties: 
+        #availability_zone: 
+          image: ubuntu 
+          flavor: {get_resource: bellhop1_type} 
+          networks:
+             - port: { get_resource: DVP-VIO_vdu_1_port1 }
+             - port: { get_resource: SRIOV_vdu_1_port2 }
+    DVP-VIO_vdu_1_port1:
+         type: OS::Neutron::Port
+         properties: 
+            network_id: DVP-VIO 
+            binding:vnic_type: normal 
+    SRIOV_vdu_1_port2:
+      type: OS::Neutron::Port
+      properties: 
+         network_id: SRIOV 
+         binding:vnic_type: normal       
+    
+    bellhop1_type:
+        type: OS::Nova::Flavor
+        properties:
+           name:  bellhop1
+           ram:  2048
+           disk: 20
+           vcpus: 2
+           extra_specs: {  cpu_policy: dedicated  , mem_page_size: Large   ,numa_nodes: 1  }   
+    vdu_2:
+       type: OS::Nova::Server
+       properties: 
+        #availability_zone: 
+          image: ubuntu 
+          flavor: {get_resource: bellhop2_type} 
+          networks:
+             - port: { get_resource: SRIOV_vdu_2_port1 }
+    SRIOV_vdu_2_port1:
+         type: OS::Neutron::Port
+         properties: 
+            network_id: SRIOV 
+            binding:vnic_type: direct        
+    
+    bellhop2_type:
+        type: OS::Nova::Flavor
+        properties:
+           name:  bellhop2
+           ram:  2048
+           disk: 20
+           vcpus: 2
+           extra_specs: {    }         
+    # New Networks to be created
+    
